@@ -1,6 +1,5 @@
 import re
 
-
 class Pessoa:
     def __init__(self, nome, cpf, telefone, email):
         self.set_nome(nome)
@@ -35,7 +34,7 @@ class Pessoa:
             if digito == 10:
                 digito = 0
             if int(digitos[quantidade]) != digito:
-                return False
+                return False20
 
         return True
 
