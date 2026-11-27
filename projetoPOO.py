@@ -1,15 +1,18 @@
-#Projeto POO
+# Projeto POO
+# Sistema de cadastro de clientes, funcionários e produtos.
 
 import re
 
+# Classe base: reúne dados e validações comuns às pessoas.
 class Pessoa:
     def __init__(self, nome, cpf, telefone, email):
+        # O construtor recebe os dados e chama os setters para validá-los.
         self.set_nome(nome)
         self.set_cpf(cpf)
         self.set_telefone(telefone)
         self.set_email(email)
 
-    # GETTERS
+    # GETTERS: permitem consultar os atributos privados da classe.
     def get_nome(self):
         return self.__nome
 
@@ -24,10 +27,12 @@ class Pessoa:
 
     @staticmethod
     def _cpf_valido(digitos):
+        # Um CPF válido deve ter 11 dígitos e não pode ter números repetidos.
         if len(digitos) != 11 or digitos == digitos[0] * 11:
             return False
 
         for quantidade in (9, 10):
+            # Calcula os dois dígitos verificadores do CPF.
             soma = sum(
                 int(digitos[indice]) * (quantidade + 1 - indice)
                 for indice in range(quantidade)
@@ -36,11 +41,11 @@ class Pessoa:
             if digito == 10:
                 digito = 0
             if int(digitos[quantidade]) != digito:
-                return False20
+                return False
 
         return True
 
-    # SETTERS COM VALIDAÇÃO
+    # SETTERS COM VALIDAÇÃO: alteram atributos somente com valores válidos.
     @staticmethod
     def _validar_nome(nome):
         if isinstance(nome, str) and len(nome.strip()) >= 3:
@@ -72,9 +77,11 @@ class Pessoa:
     def _validar_telefone(telefone):
         if isinstance(telefone, str):
             telefone_limpo = telefone.strip()
+            # Separa os números para verificar a quantidade de dígitos.
             digitos = "".join(
                 caractere for caractere in telefone_limpo if caractere.isdecimal()
             )
+            # Permite apenas caracteres adequados para um telefone.
             formato_valido = all(
                 caractere.isdecimal() or caractere in " ()+-."
                 for caractere in telefone_limpo
@@ -89,6 +96,7 @@ class Pessoa:
     @staticmethod
     def _validar_email(email):
         email = email.strip() if isinstance(email, str) else ""
+        # Expressão regular que exige texto, @, domínio e ponto.
         if re.fullmatch(r"[^@\s]+@[^@\s.]+(?:\.[^@\s.]+)+", email):
             return email
         raise ValueError("Informe um e-mail válido.")
@@ -106,10 +114,13 @@ class Pessoa:
         )
 
 
+# Herança: Cliente recebe todos os dados e métodos da classe Pessoa.
 class Cliente(Pessoa):
     def __init__(self, nome, cpf, telefone, email):
+        # super() chama o construtor da classe base Pessoa.
         super().__init__(nome, cpf, telefone, email)
-    # OVERRIDING
+
+    # OVERRIDING: sobrescreve como os dados do cliente são exibidos.
     def exibir_dados(self):
         return (
             f"[CLIENTE] {self.get_nome()} | "
@@ -118,16 +129,17 @@ class Cliente(Pessoa):
         )
 
 
+# Esta classe também herda de Pessoa e acrescenta o atributo cargo.
 class Funcionario(Pessoa):
     def __init__(self, nome, cpf, telefone, email, cargo):
         super().__init__(nome, cpf, telefone, email)
         self.set_cargo(cargo)
 
-    # GETTER
+    # GETTER: retorna o cargo armazenado no objeto.
     def get_cargo(self):
         return self.__cargo
     
-    # SETTER
+    # SETTER COM VALIDAÇÃO: verifica o cargo antes de armazená-lo.
     @staticmethod
     def _validar_cargo(cargo):
         if isinstance(cargo, str) and len(cargo.strip()) >= 2:
@@ -137,7 +149,7 @@ class Funcionario(Pessoa):
     def set_cargo(self, cargo):
         self.__cargo = self._validar_cargo(cargo)
 
-    # OVERRIDING
+    # OVERRIDING: apresenta os dados específicos de um funcionário.
     def exibir_dados(self):
         return (
             f"[FUNCIONÁRIO] {self.get_nome()} | "
@@ -146,20 +158,21 @@ class Funcionario(Pessoa):
         )
 
 
+# Classe independente que representa os produtos cadastrados.
 class Produto:
     def __init__(self, nome, preco):
         self.set_nome(nome)
         self.set_preco(preco)
 
 
-    # GETTERS
+    # GETTERS: consultam o nome e o preço do produto.
     def get_nome(self):
         return self.__nome
 
     def get_preco(self):
         return self.__preco
 
-    # SETTERS COM VALIDAÇÃO
+    # SETTERS COM VALIDAÇÃO: garantem dados corretos para o produto.
     @staticmethod
     def _validar_nome(nome):
         if isinstance(nome, str) and len(nome.strip()) >= 3:
@@ -168,6 +181,7 @@ class Produto:
 
     @staticmethod
     def _validar_preco(preco):
+        # bool não deve ser aceito como preço, pois também é um tipo numérico.
         if (
             isinstance(preco, (int, float))
             and not isinstance(preco, bool)
@@ -189,10 +203,13 @@ class Produto:
         )
 
 
+# Lista que guarda temporariamente todos os objetos cadastrados.
+# Os dados serão perdidos quando o programa for encerrado.
 cadastros = []
 
 
 def _ler_resposta(prompt, validar):
+    # Repete a leitura até a função de validação retornar um valor válido.
     while True:
         resposta = input(prompt)
         try:
@@ -202,6 +219,7 @@ def _ler_resposta(prompt, validar):
 
 
 def _validar_preco_digitado(preco):
+    # Converte o texto digitado pelo usuário em número antes da validação.
     try:
         preco = float(preco)
     except ValueError:
@@ -210,6 +228,7 @@ def _validar_preco_digitado(preco):
 
 
 def cadastrar_cliente():
+    # Coleta os dados, cria um objeto Cliente e o adiciona à lista.
     print("\n--- CADASTRO DE CLIENTE ---")
 
     nome = _ler_resposta("Nome: ", Pessoa._validar_nome)
@@ -224,6 +243,7 @@ def cadastrar_cliente():
 
 
 def cadastrar_funcionario():
+    # Coleta os dados pessoais e o cargo, criando um objeto Funcionário.
     print("\n--- CADASTRO DE FUNCIONÁRIO ---")
 
     nome = _ler_resposta("Nome: ", Pessoa._validar_nome)
@@ -239,6 +259,7 @@ def cadastrar_funcionario():
 
 
 def cadastrar_produto():
+    # Coleta nome e preço, cria um objeto Produto e o salva na lista.
     print("\n--- CADASTRO DE PRODUTO ---")
 
     nome = _ler_resposta("Nome do produto: ", Produto._validar_nome)
@@ -250,6 +271,7 @@ def cadastrar_produto():
 
 
 def listar_cadastros():
+    # Percorre a lista e executa o método exibir_dados de cada objeto.
     if len(cadastros) == 0:
         print("\nNenhum cadastro encontrado.")
         return
@@ -266,6 +288,7 @@ def listar_cadastros():
 
 
 def consultar_cadastro():
+    # A posição informada pelo usuário corresponde ao índice posição - 1.
     if len(cadastros) == 0:
         print("\nNão existem cadastros para consultar.")
         return
@@ -291,11 +314,13 @@ def consultar_cadastro():
 
 
 def relatorio_produtos():
+    # Filtra os objetos Produto e calcula quantidade, total e média.
 
     total = 0.0
     quantidade = 0
 
     for item in cadastros:
+        # isinstance verifica se o objeto pertence à classe Produto.
         if isinstance(item, Produto):
             total += item.get_preco()
             quantidade += 1
@@ -310,10 +335,12 @@ def relatorio_produtos():
         print(f"Preço médio dos produtos: R$ {media:.2f}")
 
     except ZeroDivisionError:
+        # Esta exceção evita uma divisão por zero quando não existem produtos.
         print("Não existem produtos para calcular a média.")
 
 
 def menu_principal():
+    # while True mantém o menu ativo até o usuário escolher sair.
     while True:
 
         print("\n================================")
@@ -334,6 +361,7 @@ def menu_principal():
             print("Entrada inválida! Digite apenas números.")
             continue
 
+        # Cada opção chama a função responsável pela operação escolhida.
         if opcao == 1:
             cadastrar_cliente()
 
@@ -359,5 +387,6 @@ def menu_principal():
         else:
             print("Opção inválida! Escolha uma opção do menu.")
 
+# Somente executa o menu quando o arquivo for iniciado diretamente.
 if __name__ == "__main__":
     menu_principal()
